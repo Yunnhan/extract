@@ -14,9 +14,9 @@ class ComputationMoney(Computation):
         '''去除明确的杂数据(对于金额数据)，为保持语义关系，用''占位
         return tokens (list)
         '''
-        UNCORRELATED = re.compile(u'\d{4}-\d{2}-\d{2}|( |电话|方式|号|率|路|传真|编|面积|地址|码|时间|[a-zA-Z])\D*\d+|\d+万?( |天|家|年|月|日|时|分|面积|米|分|个|条款|线|号|公里|页|层|室|平方米|㎡|%)|(\d+-\d+)')            
+        UNCORRELATED = re.compile(u'\d{4}-\d{2}-\d{2}|( |电话|方式|号|率|路|传真|编|面积|地址|码|时间|[a-zA-Z])\D?\d+|\d+万?( |天|家|年|月|日|时|分|面积|米|分|个|条款|线|号|公里|页|层|室|平方米|㎡|%)|(\d+-\d+)')            
 #         UNCORRELATED = re.compile(u'\d{4}-\d{2}-\d{2}|( |电话|方式|号|率|路|传真|编|面积|地址|码|时间|[a-zA-Z])\D?\d+|\d+万?( |天|家|年|月|日|时|分|面积|米|分|个|条款|线|号|公里|页|层|室|平方米|㎡|%)|(\d+-\d+)')            
-        
+        ALNUM = re.compile('[a-zA-Z]')
         KEEP = re.compile(u'元|价|金额|总计|公司|￥|第(一|1)|元')
         ALLOWED =['天', '家', '年', '月', '日', '时', '分', '面积', '米', '分', '楼', '座', '室', '个', '条款', '线', '号', '公里', '页', '层', '室', '平方米', '㎡', '%']
         for i in range(len(tokens)):
@@ -28,8 +28,7 @@ class ComputationMoney(Computation):
                     end = tmp.end()
                     k=1
                     for j in range(start,0,-1): 
-#                         print('j',j)  
-                        if not s[j].isalnum() and not s[j] in string.punctuation and not s[j] in ALLOWED :
+                        if not ALNUM.search(s[j]) and not s[j] in string.punctuation and not s[j] in ALLOWED :
                             k=j
                             break
                     pre = s[:k]
@@ -38,8 +37,7 @@ class ComputationMoney(Computation):
                         s = pre
                     else:
                         for j in range(end,len(s)):  
-#                             print('jj',j)
-                            if not s[j].isalnum() and not s[j] in string.punctuation and not s[j] in ALLOWED :
+                            if not ALNUM.search(s[j]) and not s[j] in string.punctuation and not s[j] in ALLOWED :
                                 k=j-1
                                 break   
                     tokens[i]=pre+s[k+1:] 
@@ -47,7 +45,7 @@ class ComputationMoney(Computation):
             elif tmp:
                 tokens[i]=''
                 
-            if tokens[i].startswith('0') or len(tokens[i])==1:
+            if tokens[i].startswith('0') :#or len(tokens[i])==1
                 tokens[i]=''
         return tokens 
 

@@ -19,8 +19,10 @@ class MoneyInformation(Information):
         return list
         '''
         ngrams =[]
-        for i in range(len(tokens)-n):
+        for i in range(len(tokens)):
             tmp=' '
+            if i+n>len(tokens):
+                break
             for j in range(i,i+n):
                 if not tokens[j]:
                     continue
@@ -39,6 +41,7 @@ class MoneyInformation(Information):
         '''读入文档进行字段提取
         '''   
         rough_text = self.get_clean_text(info_sequence)
+#         print(rough_text)
         tokens = self.compute_money.strip_noise(rough_text)
 #         print('token',tokens)
         ngrams = self.n_grams(3,tokens)
@@ -94,7 +97,28 @@ class MoneyInformation(Information):
         return list of string
         ''' 
         tokens=[]
-        ls = [re.sub('\n| |\xa0','',e)  for e in info_soup.strings if e and e!='\n']    
+        ls=[]
+        for e in info_soup.strings:  
+            e = re.sub('\n|\xa0','',e)
+            if not e :
+                continue
+            string = ''
+            for i in range(len(e)):
+                if e[i]==' ':
+                    j=i
+                    while j>1 and e[j]==' ' :
+                        j-=1
+                    if not e[j].isdigit():
+                        continue
+                    else:
+                        j=i
+                        while j<len(e)-1 and e[j]==' ':
+                            j+=1
+                        if not e[j].isdigit():
+                            continue
+                string+=e[i]  
+            ls.append(string)
+               
         text= ' '.join(ls)
         text = re.sub("[+=！？~@#：……&*“”（）、【】]+|[\!_,$^*(+\"\'\);=><]|\xa0", "",text)  
         text = re.sub('： ',':',text)
