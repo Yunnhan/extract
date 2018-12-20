@@ -11,6 +11,7 @@ class CleanCurrency(Clean):
         :param get_target_function: 对于不符合条件的字符串，清理出有效的target. 输入：字符串， 输出：该字符串中可能有效的target列表
         :return: 有效的target列表 None/list
         """
+#         print('validating')
         if amount_list is None:
             return None
         if not amount_list:
@@ -18,25 +19,26 @@ class CleanCurrency(Clean):
         
         #list 中的金额去重，并保持原顺序不变    
         amount_list = self.remove_duplicates(amount_list)
+#         print(amount_list)
         #去除非法金额
-        valid_list =[ e for e in amount_list if self.is_valid(e)]
-        a = [str(float(e)) for e in valid_list]
+        valid_list =[ self.is_valid(e) for e in amount_list ]
+        a = [str(float(e)) for e in valid_list if e]
         
         if unit_list:   
             unit = list(set(unit_list))
-            
+            print(unit)
             if len(unit)==1:
                 if unit[0]=='元':   
                     valid_list=[e for e in a if float(e)>10000]   
                 else:
                     if '0.0' in a:
                         a.remove('0.0')
-                    tmp = [float(e) for e in a ]
-                    max_amount = max(tmp)
-                    min_amount = min(tmp)
-                    if max_amount - min_amount>100:
-                        a.remove(str(min_amount))
-                    valid_list=a
+#                     tmp = [float(e) for e in a ]
+#                     max_amount = max(tmp)
+#                     min_amount = min(tmp)
+#                     if max_amount - min_amount>100:
+#                         a.remove(str(min_amount))
+#                     valid_list=a
                              
             else:
                 print('单位不统一')
@@ -50,9 +52,9 @@ class CleanCurrency(Clean):
     
     def is_valid(self, target):
         if target is None:
-            return False
+            return ''
         if not target:
-            return False
+            return ''
         if not isinstance(target, str):
             raise ValueError('clean, target 不是字符串')
         return  re.sub(r"[^\d\.]","",target) 

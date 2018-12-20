@@ -2,6 +2,7 @@ from algorithm.feature_compute.compute import Computation
 import pandas as pd
 import re
 import string
+from sklearn.cluster import KMeans
 
 class ComputationMoney(Computation):
 
@@ -13,8 +14,9 @@ class ComputationMoney(Computation):
         '''去除明确的杂数据(对于金额数据)，为保持语义关系，用''占位
         return tokens (list)
         '''
-        print(tokens)
-        UNCORRELATED = re.compile(u'\d{4}-\d{2}-\d{2}|( |电话|方式|号|率|路|传真|编|面积|地址|码|时间|[a-zA-Z])\D?\d+|\d+万?( |天|家|年|月|日|时|分|面积|米|分|个|条款|线|号|公里|页|层|室|平方米|㎡|%)|(\d+-\d+)')            
+        UNCORRELATED = re.compile(u'\d{4}-\d{2}-\d{2}|( |电话|方式|号|率|路|传真|编|面积|地址|码|时间|[a-zA-Z])\D*\d+|\d+万?( |天|家|年|月|日|时|分|面积|米|分|个|条款|线|号|公里|页|层|室|平方米|㎡|%)|(\d+-\d+)')            
+#         UNCORRELATED = re.compile(u'\d{4}-\d{2}-\d{2}|( |电话|方式|号|率|路|传真|编|面积|地址|码|时间|[a-zA-Z])\D?\d+|\d+万?( |天|家|年|月|日|时|分|面积|米|分|个|条款|线|号|公里|页|层|室|平方米|㎡|%)|(\d+-\d+)')            
+        
         KEEP = re.compile(u'元|价|金额|总计|公司|￥|第(一|1)|元')
         ALLOWED =['天', '家', '年', '月', '日', '时', '分', '面积', '米', '分', '楼', '座', '室', '个', '条款', '线', '号', '公里', '页', '层', '室', '平方米', '㎡', '%']
         for i in range(len(tokens)):
@@ -72,7 +74,7 @@ class ComputationMoney(Computation):
                 if len(values)==1:
                     ele = self.strip_noise([ele])[0]
                     if ele and ele!='':
-                        print(ele)
+#                         print(ele)
                         tmp = NUMBER.findall(ele)
                 else:
                     continue
@@ -115,23 +117,20 @@ class ComputationMoney(Computation):
             print('空df')
             return None
         auxiliary_key_locs = self.get_location(df, auxiliary_key) 
-#         print(auxiliary_key_locs)
         key_locs = self.get_location(df, key_pattern)  # 获取关键词位置
         if key_locs is None or  key_locs.shape[0] == 0:  # 检查关键词位置是否有效
             print('no keyword')
             return None
-        
         if auxiliary_key_locs is not None and auxiliary_key_locs.shape[0]>0:
             intersection = self.get_intersection_point(key_locs,auxiliary_key_locs)
             tmp = self.check_locs_values(df,intersection)
             if tmp[0]:
                 print('交叉')
                 return tmp
-#         res = []  # 获取的结果
         res,units = self.check_locs_values(df,key_locs)
         if res:  
             return res,units
-        
+    
         search_direction = self.get_df_type_pro(df, is_weak=True)  # 获取df的类型， 是‘横向查找’还是‘纵向查找’。
         if search_direction == '纵向查找':
             search_loc = self.get_next_vertical_cell(key_locs, df.shape)  # 获取关键词下方的位置
@@ -239,7 +238,7 @@ class ComputationMoney(Computation):
                     print('--',text[i])
                     print('cc--',tmp)
                     money.append(tmp[0] )
-        if money:   
+        if money :   
             return money,unit[0]
         return None
      
@@ -303,20 +302,17 @@ class ComputationMoney(Computation):
         #唯一数字情况
         if len(amount)==1:
             print('单',amount[0],unit[0])
-            return
-#           return amount[0],unit[0]
+            return amount[0],unit[0]
 # # --用第一取多个价格
         res = self.pattern_search('第(一|1)\D',unit,text,amount)
         if res:
             print('第一：',res[0],res[1]) 
-            return 
-#             return res
+            return res
 
 #---用投标价格取第一个价格
         res = self.pattern_match_then_search('投标.*价|投标金额|中标.*(金额|价)|中标值|成交金额|总中标金额|最终报价|成交价|￥',unit,text,amount)
         if res:
             print('价格：',res[0],res[1]) 
-            return 
             return res
           
         res = self.pattern_search('公司',unit,text,amount) 
@@ -324,7 +320,8 @@ class ComputationMoney(Computation):
             if len(res[0])>2 and len(res[0])%2==0 and self.k_means(res[0]):
                 tmp = [res[0][0],res[0][3]]
                 print('公司：',tmp,res[1]) 
-                return
+                return tmp,res[1]
+#                 return
             print('公司：',res[0],res[1]) 
-            return 
             return res
+        

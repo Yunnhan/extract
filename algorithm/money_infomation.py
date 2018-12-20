@@ -40,19 +40,33 @@ class MoneyInformation(Information):
         '''   
         rough_text = self.get_clean_text(info_sequence)
         tokens = self.compute_money.strip_noise(rough_text)
+#         print('token',tokens)
         ngrams = self.n_grams(3,tokens)
+#         print('ngram',ngrams)
         if not ngrams:
             print('None ngrams')
             return
-#         print(tokens)
-#         print('ngram',ngrams)
+
+       
         unit, text ,amount = self.compute_money.extract_candidate(ngrams)
+#         print('origin',amount)
+        if not unit or len(unit)!=1:
+            if not unit:
+                print('无单位')
+            else :
+                print('单位不统一')
+            return 
         amount = self.clean_currency.get_target_list(amount,unit)
+#         print('proc',amount)
         if not amount:
             print('没有合法金额')
             return
 #         print(amount)
         tmp = self.compute_money.get_currency(unit, text ,amount)
+        if not tmp:
+            print('没有结果')
+            return
+        return tmp
         
     
     
@@ -68,20 +82,33 @@ class MoneyInformation(Information):
         if tmp:
             res= self.clean_currency.get_target_list(tmp[0],tmp[1])
             return res,tmp[1]
-        res = self.text_search(bid_data_obj.get_info_sequence())
+
+        res = self.text_search(bid_data_obj.get_info_soup())
        
-        
         return res 
     
     
-    def get_clean_text(self,info_sequence):
+    def get_clean_text(self,info_soup):
         ''' 对soup sequence 进行进一步清理
         @info_soup:  Beautiful_soup 对象
         return list of string
         ''' 
-        print(info_sequence)
-        text = [re.sub('[ \xa0\t\u3000、]','',e) for e in info_sequence ]
-        text = [e for e in text if e ]
-        return text
+        tokens=[]
+        ls = [re.sub('\n| |\xa0','',e)  for e in info_soup.strings if e and e!='\n']    
+        text= ' '.join(ls)
+        text = re.sub("[+=！？~@#：……&*“”（）、【】]+|[\!_,$^*(+\"\'\);=><]|\xa0", "",text)  
+        text = re.sub('： ',':',text)
+        seg = re.split('\n|。|；|，|%',text)  # 切分
+        for e in seg:
+            if e and e!='\xa0' : #and len(e)>1
+                e = re.sub('[\xa0\t\u3000]',' ',e)              
+                if e:       
+                    tokens.append(e) 
+        info_seg = ' '.join(tokens)
+        tmp = info_seg.split(' ')
+        tokens = [e for e in tmp if e]            
+#         text =[re.sub('[ \xa0\t\u3000、]','',e) for e in info_sequence ]
+#         text = [e for e in text if e ]
+        return tokens
         
 
