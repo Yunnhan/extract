@@ -14,9 +14,9 @@ class ComputationMoney(Computation):
         '''去除明确的杂数据(对于金额数据)，为保持语义关系，用''占位
         return tokens (list)
         '''
-        UNCORRELATED = re.compile(u'\d{4}-\d{2}-\d{2}|( |电话|方式|号|率|路|传真|编|面积|地址|码|时间|[a-zA-Z])\D?\d+|\d+万?( |天|家|年|月|日|时|分|面积|米|分|个|条款|线|号|公里|页|层|室|平方米|㎡|%)|(\d+-\d+)')            
-#         UNCORRELATED = re.compile(u'\d{4}-\d{2}-\d{2}|( |电话|方式|号|率|路|传真|编|面积|地址|码|时间|[a-zA-Z])\D?\d+|\d+万?( |天|家|年|月|日|时|分|面积|米|分|个|条款|线|号|公里|页|层|室|平方米|㎡|%)|(\d+-\d+)')            
-        ALNUM = re.compile('[a-zA-Z]')
+#         UNCORRELATED = re.compile(u'\d{4}-\d{2}-\d{2}|( |电话|方式|号|率|路|传真|编|面积|地址|码|时间|[a-zA-Z])\D?\d+|万?( |天|家|年|月|日|时|分|面积|米|分|个|条款|线|号|公里|页|层|室|平方米|㎡|%)|(\d+-\d+)')            
+        UNCORRELATED = re.compile(u'\d{4}-\d{2}-\d{2}|( |电话|方式|号|率|路|传真|编|面积|地址|码|时间|[a-zA-Z])\D?\d+|\d+万?( |天|家|年|月|日|时|分|面积|米|分|个|条款|线|号|公里|页|层|室|平方米|㎡|%)|(\d+-\d+)')        
+        ALNUM = re.compile('[a-zA-Z0-9]')
         KEEP = re.compile(u'元|价|金额|总计|公司|￥|第(一|1)|元')
         ALLOWED =['天', '家', '年', '月', '日', '时', '分', '面积', '米', '分', '楼', '座', '室', '个', '条款', '线', '号', '公里', '页', '层', '室', '平方米', '㎡', '%']
         for i in range(len(tokens)):
@@ -69,13 +69,14 @@ class ComputationMoney(Computation):
             if not tmp :
                 continue
             if len(tmp)>1 :
-                if len(values)==1:
-                    ele = self.strip_noise([ele])[0]
-                    if ele and ele!='':
+#                 if len(values)==1:
+#                     print(ele)
+#                     ele = self.strip_noise([ele])[0]
+#                     if ele and ele!='':
 #                         print(ele)
-                        tmp = NUMBER.findall(ele)
-                else:
-                    continue
+#                         tmp = NUMBER.findall(ele)
+#                 else:
+                continue
             res.extend(tmp)
         
             
@@ -127,6 +128,7 @@ class ComputationMoney(Computation):
                 return tmp
         res,units = self.check_locs_values(df,key_locs)
         if res:  
+            print('key')
             return res,units
     
         search_direction = self.get_df_type_pro(df, is_weak=True)  # 获取df的类型， 是‘横向查找’还是‘纵向查找’。

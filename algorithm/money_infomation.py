@@ -57,6 +57,7 @@ class MoneyInformation(Information):
             if not unit:
                 print('无单位')
             else :
+                print(unit)
                 print('单位不统一')
             return 
         amount = self.clean_currency.get_target_list(amount,unit)
@@ -85,7 +86,7 @@ class MoneyInformation(Information):
         if tmp:
             res= self.clean_currency.get_target_list(tmp[0],tmp[1])
             return res,tmp[1]
-
+        print('text')
         res = self.text_search(bid_data_obj.get_info_soup())
        
         return res 
