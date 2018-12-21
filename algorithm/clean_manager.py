@@ -1,5 +1,5 @@
 from collections import OrderedDict
-# from algorithm.nlp_algorithm.ltp_algorithm import Ner
+from algorithm.nlp_algorithm.ltp_algorithm import Ner
 from algorithm.tag_search import TagSearch
 from algorithm.clean_base import Clean
 import re
@@ -35,7 +35,6 @@ class CleanManager(Clean):
             return False
         if not target:
             return False
-
         if not isinstance(target, str):
             raise ValueError('clean, target 不是字符串')
         if self.PARENTHESES_PRE.findall(target):

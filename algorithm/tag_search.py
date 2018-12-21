@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from algorithm.feature_compute.compute import Computation
-# from algorithm.nlp_algorithm.ltp_algorithm import Ner
+from algorithm.nlp_algorithm.ltp_algorithm import Ner
 from algorithm.create_df.read_data_lib.data_base import DataSQL
 import re
 
